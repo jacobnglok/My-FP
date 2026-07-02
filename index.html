@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Finance Planner</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="./icons/favicon-64.png" />
+  <meta name="theme-color" content="#0f766e" />
+
+  <!-- FullCalendar CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
+  />
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>💰 My Finance Planner</h1>
+    <button id="installBtn" class="btn secondary" hidden>Install App</button>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-target="dashboard">Dashboard</button>
+    <button class="tab" data-target="transactions">Transactions</button>
+    <button class="tab" data-target="calendar">Calendar</button>
+    <button class="tab" data-target="debts">Debts</button>
+    <button class="tab" data-target="insuranceAssets">Insurance & Assets</button>
+    <button class="tab" data-target="backup">Backup</button>
+  </nav>
+
+  <main>
+    <!-- Dashboard -->
+    <section id="dashboard" class="panel show">
+      <div class="cards">
+        <div class="card"><h3>This Month Income</h3><p id="mIncome">$0.00</p></div>
+        <div class="card"><h3>This Month Expense</h3><p id="mExpense">$0.00</p></div>
+        <div class="card"><h3>Net Cash Flow</h3><p id="mNet">$0.00</p></div>
+        <div class="card"><h3>Total Debt</h3><p id="totalDebt">$0.00</p></div>
+        <div class="card"><h3>Total Assets</h3><p id="totalAssets">$0.00</p></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Expenses by Category (This Month)</h3>
+          <canvas id="expenseChart"></canvas>
+        </div>
+        <div class="card">
+          <h3>Upcoming Due (14 days)</h3>
+          <ul id="dueList" class="list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transactions -->
+    <section id="transactions" class="panel">
+      <div class="card">
+        <h3>Add Transaction</h3>
+        <form id="txForm" class="form-grid">
+          <label>Date
+            <input type="date" name="date" required />
+          </label>
+
+          <label>Type
+            <select name="type" required>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+              <option value="transfer">Transfer</option>
+            </select>
+          </label>
+
+          <label>Amount
+            <input type="number" name="amount" step="0.01" min="0" required />
+          </label>
+
+          <label>Category
+            <select name="category" required>
+              <option>Food</option>
+              <option>Transport</option>
+              <option>Bills</option>
+              <option>Shopping</option>
+              <option>Health</option>
+              <option>Entertainment</option>
+              <option>Salary</option>
+              <option>Investment</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label>Account
+            <select id="accountSelect" name="accountId" required></select>
+          </label>
+
+          <label>Note
+            <input type="text" name="note" placeholder="Optional note" />
+          </label>
+
+          <div class="row">
+            <button type="submit" class="btn">Save Transaction</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Recent Transactions</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Account</th>
+              <th>Note</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="txTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Calendar -->
+    <section id="calendar" class="panel">
+      <div class="card">
+        <h3>Calendar (Transactions + Due Dates)</h3>
+        <div id="calendarView"></div>
+      </div>
+    </section>
+
+    <!-- Debts -->
+    <section id="debts" class="panel">
+      <div class="grid2">
+        <div class="card">
+          <h3>Add Loan</h3>
+          <form id="loanForm" class="form-grid">
+            <label>Name <input type="text" name="name" required /></label>
+            <label>Principal <input type="number" step="0.01" name="principal" required /></label>
+            <label>Interest % <input type="number" step="0.01" name="interestRate" required /></label>
+            <label>EMI <input type="number" step="0.01" name="emi" required /></label>
+            <label>Due day (1-31) <input type="number" min="1" max="31" name="dueDay" required /></label>
+            <label>Remaining <input type="number" step="0.01" name="remaining" required /></label>
+            <div class="row"><button type="submit" class="btn">Save Loan</button></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Add Credit Card</h3>
+          <form id="cardForm" class="form-grid">
+            <label>Name <input type="text" name="name" required /></label>
+            <label>Limit <input type="number" step="0.01" name="limit" required /></label>
+            <label>Statement day <input type="number" min="1" max="31" name="statementDay" required /></label>
+            <label>Due day (1-31) <input type="number" min="1" max="31" name="dueDay" required /></label>
+            <label>Outstanding <input type="number" step="0.01" name="outstanding" required /></label>
+            <label>APR % <input type="number" step="0.01" name="apr" required /></label>
+            <div class="row"><button type="submit" class="btn">Save Card</button></div>
+          </form>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card"><h3>Loans</h3><ul id="loanList" class="list"></ul></div>
+        <div class="card"><h3>Credit Cards</h3><ul id="cardList" class="list"></ul></div>
+      </div>
+    </section>
+
+    <!-- Insurance + Assets -->
+    <section id="insuranceAssets" class="panel">
+      <div class="grid2">
+        <div class="card">
+          <h3>Add Insurance</h3>
+          <form id="insuranceForm" class="form-grid">
+            <label>Policy Name <input type="text" name="policyName" required /></label>
+            <label>Premium <input type="number" step="0.01" name="premium" required /></label>
+            <label>Frequency
+              <select name="frequency" required>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </label>
+            <label>Next Due Date <input type="date" name="nextDueDate" required /></label>
+            <label>Coverage <input type="number" step="0.01" name="coverage" required /></label>
+            <div class="row"><button type="submit" class="btn">Save Insurance</button></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Add Asset</h3>
+          <form id="assetForm" class="form-grid">
+            <label>Name <input type="text" name="name" required /></label>
+            <label>Type <input type="text" name="type" placeholder="Cash, Investment, Property..." required /></label>
+            <label>Value <input type="number" step="0.01" name="value" required /></label>
+            <label>Date <input type="date" name="date" required /></label>
+            <div class="row"><button type="submit" class="btn">Save Asset</button></div>
+          </form>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card"><h3>Insurances</h3><ul id="insuranceList" class="list"></ul></div>
+        <div class="card"><h3>Assets</h3><ul id="assetList" class="list"></ul></div>
+      </div>
+    </section>
+
+    <!-- Backup -->
+    <section id="backup" class="panel">
+      <div class="card">
+        <h3>Backup / Restore</h3>
+        <div class="row">
+          <button id="exportBtn" class="btn">Export JSON Backup</button>
+          <label class="btn secondary" for="importInput" style="cursor:pointer;">Import JSON Backup</label>
+          <input id="importInput" type="file" accept=".json,application/json" hidden />
+        </div>
+        <p class="muted">Tip: keep backup files outside GitHub repo. Do not commit personal data.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/dexie@4/dist/dexie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+  <script src="./app.js"></script>
+</body>
+</html>
